@@ -33,7 +33,9 @@ struct OffsetCalculator {
 
   // if element_sizes is nullptr, then the strides will be in bytes, otherwise
   // the strides will be in # of elements.
-  OffsetCalculator(int dims, const int64_t* sizes, const int64_t* const* strides, const int64_t* element_sizes=nullptr) : dims(dims) {
+  OffsetCalculator(
+    int dims, const int64_t *sizes, const int64_t *const *strides, const int64_t *element_sizes = nullptr)
+      : dims(dims) {
     TORCH_CHECK(dims <= MAX_DIMS, "tensor has too many (>", MAX_DIMS, ") dims");
     for (int i = 0; i < MAX_DIMS; ++i) {
       if (i < dims) {
@@ -43,7 +45,7 @@ struct OffsetCalculator {
       }
       for (int arg = 0; arg < NARGS; arg++) {
         int64_t element_size = (element_sizes == nullptr ? 1LL : element_sizes[arg]);
-        strides_[i][arg] =  i < dims ? strides[arg][i] / element_size : 0;
+        strides_[i][arg] = i < dims ? strides[arg][i] / element_size : 0;
       }
     }
   }
@@ -67,7 +69,6 @@ struct OffsetCalculator {
       for (int arg = 0; arg < NARGS; arg++) {
         offsets[arg] += divmod.mod * strides_[dim][arg];
       }
-
     }
     return offsets;
   }
@@ -96,10 +97,10 @@ struct TrivialOffsetCalculator {
   }
 };
 
-template<int N>
-static OffsetCalculator<N> make_offset_calculator(const at::TensorIterator& iter) {
+template <int N>
+static OffsetCalculator<N> make_offset_calculator(const at::TensorIterator &iter) {
   AT_ASSERT(N <= iter.ntensors());
-  std::array<const int64_t*, N> strides;
+  std::array<const int64_t *, N> strides;
   for (int i = 0; i < N; i++) {
     strides[i] = iter.strides(i).data();
   }
