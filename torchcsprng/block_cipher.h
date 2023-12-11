@@ -60,6 +60,8 @@ TORCH_CSPRNG_HOST_DEVICE static void block_cipher_kernel_helper(int64_t idx, cip
   int64_t output_numel, int output_type_size, output_index_calc_t output_index_calc, transform_t transform) {
   uint8_t block[block_size];
   std::memset(&block, 0, block_size);  // is it ok to use zeros as padding?
+  // In this application, we require users to pass in the input that is a multiple of block_size.
+  // So zero padding never actually happens and it is ok.
   if (input_ptr != nullptr) {
     copy_input_to_block(idx, block, block_size, input_ptr, input_numel, input_type_size, input_index_calc);
   }
