@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "aes.cuh"
+
 namespace aes {
 
 // This AES implementation is based on
@@ -55,8 +57,6 @@ namespace aes {
 #define Nr 10  // The number of rounds in AES Cipher.
 #endif
 
-constexpr size_t block_t_size = 16;
-
 typedef uint8_t state_t[4][4];
 
 // The lookup-tables are marked const so they can be placed in read-only storage instead of RAM
@@ -102,8 +102,7 @@ TORCH_CSPRNG_CONSTANT const uint8_t Rcon[11] = {0x8d, 0x01, 0x02, 0x04, 0x08, 0x
 
 #define getSBoxInvert(num) (rsbox[(num)])
 
-// This function produces Nb(Nr+1) round keys. The round keys are used in each round to decrypt the states.
-TORCH_CSPRNG_HOST_DEVICE void KeyExpansion(uint8_t *RoundKey, const uint8_t *Key) {
+void KeyExpansion(uint8_t *RoundKey, const uint8_t *Key) {
   unsigned int i, j, k;
   uint8_t tempa[4];  // Used for the column/row operations
 
@@ -312,10 +311,7 @@ TORCH_CSPRNG_HOST_DEVICE void InvShiftRows(state_t *state) {
   (*state)[3][3] = temp;
 }
 
-TORCH_CSPRNG_HOST_DEVICE void encrypt(uint8_t *state, const uint8_t *key) {
-  uint8_t RoundKey[176];
-  KeyExpansion(RoundKey, key);
-
+TORCH_CSPRNG_HOST_DEVICE void encrypt_with_round_key(uint8_t *state, const uint8_t *RoundKey) {
   uint8_t round = 0;
 
   // Add the First round key to the state before starting the rounds.
@@ -336,30 +332,6 @@ TORCH_CSPRNG_HOST_DEVICE void encrypt(uint8_t *state, const uint8_t *key) {
   }
   // Add round key to last round
   AddRoundKey(Nr, (state_t *)state, RoundKey);
-}
-
-TORCH_CSPRNG_HOST_DEVICE void decrypt(uint8_t *state, const uint8_t *key) {
-  uint8_t RoundKey[176];
-  KeyExpansion(RoundKey, key);
-
-  uint8_t round = 0;
-
-  // Add the First round key to the state before starting the rounds.
-  AddRoundKey(Nr, (state_t *)state, RoundKey);
-
-  // There will be Nr rounds.
-  // The first Nr-1 rounds are identical.
-  // These Nr rounds are executed in the loop below.
-  // Last one without InvMixColumn()
-  for (round = (Nr - 1);; --round) {
-    InvShiftRows((state_t *)state);
-    InvSubBytes((state_t *)state);
-    AddRoundKey(round, (state_t *)state, RoundKey);
-    if (round == 0) {
-      break;
-    }
-    InvMixColumns((state_t *)state);
-  }
 }
 
 }  // namespace aes

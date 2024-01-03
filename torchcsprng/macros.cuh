@@ -11,6 +11,7 @@
 #define TORCH_CSPRNG_HOST_DEVICE __host__ __device__
 #define TORCH_CSPRNG_CONSTANT __constant__
 #else
+#error "CUDA not found"
 #define TORCH_CSPRNG_HOST_DEVICE
 #define TORCH_CSPRNG_CONSTANT
 #endif

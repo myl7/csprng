@@ -27,15 +27,17 @@ add_library(
   fssprgcuda SHARED
   lib.cpp
   lib.h
-  torchcsprng/THCIntegerDivider.cuh
-  torchcsprng/aes.h
-  torchcsprng/kernels_commons.h
-  torchcsprng/kernels.cuh
-  torchcsprng/csprng.cpp
-  torchcsprng/block_cipher.h
-  torchcsprng/macros.h
-  torchcsprng/OffsetCalculator.cuh
   torchcsprng/kernels.cu
+  torchcsprng/kernels.cuh
+  torchcsprng/macros.cuh
+  torchcsprng/kernels_commons.cuh
+  torchcsprng/block_cipher.cuh
+  torchcsprng/OffsetCalculator.cuh
+  torchcsprng/THCIntegerDivider.cuh
+  torchcsprng/owcf.cu
+  torchcsprng/owcf.cuh
+  torchcsprng/aes.cu
+  torchcsprng/aes.cuh
 )
 set_target_properties(fssprgcuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(fssprgcuda "${TORCH_LIBRARIES}")

@@ -8,9 +8,12 @@
 #ifndef THC_INTEGER_DIVIDER_INC
 #define THC_INTEGER_DIVIDER_INC
 
-#include <assert.h>
-#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+#include <cassert>
+// #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+#if defined(__CUDACC__) || defined(__HIPCC__)
 #include <cuda_runtime.h>
+#else
+#error "CUDA not found"
 #endif
 
 // A utility class to implement integer division by multiplication, given a fixed

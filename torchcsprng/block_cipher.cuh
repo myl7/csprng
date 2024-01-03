@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "macros.h"
+#include "macros.cuh"
 #include <ATen/ATen.h>
 #include <ATen/native/TensorIterator.h>
 #include "OffsetCalculator.cuh"
@@ -18,11 +18,14 @@
 #if defined(__CUDACC__) || defined(__HIPCC__)
 #include <c10/cuda/CUDAStream.h>
 #include <ATen/cuda/Exceptions.h>
+#else
+#error "CUDA not found"
 #endif
 
 #if defined(__CUDACC__) || defined(__HIPCC__)
 #define UNROLL_IF_CUDA #pragma unroll
 #else
+#error "CUDA not found"
 #define UNROLL_IF_CUDA
 #endif
 
@@ -81,35 +84,9 @@ __global__ static void block_cipher_kernel_cuda(cipher_t cipher, int output_elem
   block_cipher_kernel_helper<block_size>(idx, cipher, output_elem_per_block, input_ptr, input_numel, input_type_size,
     input_index_calc, output_ptr, output_numel, output_type_size, output_index_calc, transform);
 }
+#else
+#error "CUDA not found"
 #endif
-
-template <int block_size, typename cipher_t, typename input_index_calc_t, typename output_index_calc_t,
-  typename transform_t>
-static void block_cipher_kernel_cpu_serial(int64_t begin, int64_t end, cipher_t cipher, int output_elem_per_block,
-  void *input_ptr, int64_t input_numel, int input_type_size, input_index_calc_t input_index_calc, void *output_ptr,
-  int64_t output_numel, int output_type_size, output_index_calc_t output_index_calc, transform_t transform) {
-  for (auto idx = begin; idx < end; ++idx) {
-    block_cipher_kernel_helper<block_size>(idx, cipher, output_elem_per_block, input_ptr, input_numel, input_type_size,
-      input_index_calc, output_ptr, output_numel, output_type_size, output_index_calc, transform);
-  }
-}
-
-template <int block_size, typename cipher_t, typename input_index_calc_t, typename output_index_calc_t,
-  typename transform_t>
-static void block_cipher_kernel_cpu(int64_t total, cipher_t cipher, int output_elem_per_block, void *input_ptr,
-  int64_t input_numel, int input_type_size, input_index_calc_t input_index_calc, void *output_ptr, int64_t output_numel,
-  int output_type_size, output_index_calc_t output_index_calc, transform_t transform_func) {
-  if (total < at::internal::GRAIN_SIZE || at::get_num_threads() == 1) {
-    block_cipher_kernel_cpu_serial<block_size>(0, total, cipher, output_elem_per_block, input_ptr, input_numel,
-      input_type_size, input_index_calc, output_ptr, output_numel, output_type_size, output_index_calc, transform_func);
-  } else {
-    at::parallel_for(0, total, at::internal::GRAIN_SIZE, [&](int64_t begin, int64_t end) {
-      block_cipher_kernel_cpu_serial<block_size>(begin, end, cipher, output_elem_per_block, input_ptr, input_numel,
-        input_type_size, input_index_calc, output_ptr, output_numel, output_type_size, output_index_calc,
-        transform_func);
-    });
-  }
-}
 
 template <int block_size, typename cipher_t, typename input_index_calc_t, typename output_index_calc_t,
   typename transform_t>
@@ -121,9 +98,7 @@ void block_cipher(void *input_ptr, int64_t input_numel, int input_type_size, inp
   }
 
   if (device.type() == at::kCPU) {
-    const auto total = (output_numel + output_elem_per_block - 1) / output_elem_per_block;
-    block_cipher_kernel_cpu<block_size>(total, cipher, output_elem_per_block, input_ptr, input_numel, input_type_size,
-      input_index_calc, output_ptr, output_numel, output_type_size, output_index_calc, transform_func);
+    TORCH_CHECK(false, "torchcsprng was compiled with only CUDA support");
   } else if (device.type() == at::kCUDA) {
 #if defined(__CUDACC__) || defined(__HIPCC__)
     const auto threads = 256;
@@ -134,6 +109,7 @@ void block_cipher(void *input_ptr, int64_t input_numel, int input_type_size, inp
       transform_func);
     AT_CUDA_CHECK(cudaGetLastError());
 #else
+#error "CUDA not found"
     TORCH_CHECK(false, "torchcsprng was compiled without CUDA support");
 #endif
   } else {

@@ -23,5 +23,4 @@ void csprng_matyas_meyer_oseas_aes128(uint8_t *buf, int64_t buf_size, const uint
   Tensor key_tensor = torch::from_blob(const_cast<uint8_t *>(key), {key_size_bytes}, torch::kUInt8).to(torch::kCUDA);
 
   encrypt(input, output, key_tensor, "aes128", "ecb");
-  input ^= output;
 }
