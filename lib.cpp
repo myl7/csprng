@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "lib.h"
-
 #include <torch/torch.h>
 
 using torch::Tensor;

@@ -3,6 +3,6 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 void csprng_matyas_meyer_oseas_aes128(uint8_t *buf, int64_t buf_size, const uint8_t *key);
