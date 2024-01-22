@@ -26,18 +26,9 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 add_library(
   fssprgcuda SHARED
   lib.cpp
-  lib.h
   torchcsprng/kernels.cu
-  torchcsprng/kernels.cuh
-  torchcsprng/macros.cuh
-  torchcsprng/kernels_commons.cuh
-  torchcsprng/block_cipher.cuh
-  torchcsprng/OffsetCalculator.cuh
-  torchcsprng/THCIntegerDivider.cuh
   torchcsprng/owcf.cu
-  torchcsprng/owcf.cuh
   torchcsprng/aes.cu
-  torchcsprng/aes.cuh
 )
 set_target_properties(fssprgcuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(fssprgcuda "${TORCH_LIBRARIES}")

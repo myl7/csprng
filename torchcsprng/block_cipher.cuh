@@ -62,7 +62,8 @@ TORCH_CSPRNG_HOST_DEVICE static void block_cipher_kernel_helper(int64_t idx, cip
   void *input_ptr, int64_t input_numel, int input_type_size, input_index_calc_t input_index_calc, void *output_ptr,
   int64_t output_numel, int output_type_size, output_index_calc_t output_index_calc, transform_t transform) {
   uint8_t block[block_size];
-  std::memset(&block, 0, block_size);  // is it ok to use zeros as padding?
+  // std::memset(&block, 0, block_size);  // is it ok to use zeros as padding?
+  // No need to pad because we ensure `input_size_bytes % block_t_size == 0` previously in lib.cpp.
   // In this application, we require users to pass in the input that is a multiple of block_size.
   // So zero padding never actually happens and it is ok.
   if (input_ptr != nullptr) {
@@ -118,7 +119,7 @@ void block_cipher(void *input_ptr, int64_t input_numel, int input_type_size, inp
 }
 
 template <int block_size, typename cipher_t>
-void block_cipher(at::Tensor input, at::Tensor output, cipher_t cipher) {
+void block_cipher(at::Tensor input, cipher_t cipher) {
   const auto input_ptr = input.data_ptr();
   const auto input_numel = input.numel();
 
@@ -132,23 +133,10 @@ void block_cipher(at::Tensor input, at::Tensor output, cipher_t cipher) {
   const auto input_index_calc = [input_offset_calc] TORCH_CSPRNG_HOST_DEVICE(
                                   uint32_t li) -> uint32_t { return input_offset_calc.get(li)[0]; };
 
-  const auto output_ptr = output.data_ptr();
-  const auto output_numel = output.numel();
+  const auto device = input.device();
 
-  // Otherwise OffsetCalculator/IntDivider crashes with integer division by zero
-  if (output_ptr == nullptr || output_numel == 0) {
-    return;
-  }
-
-  const auto output_type_size = output.element_size();
-  const auto output_offset_calc = make_offset_calculator<1>(at::TensorIterator::nullary_op(output));
-  const auto output_index_calc = [output_offset_calc] TORCH_CSPRNG_HOST_DEVICE(
-                                   uint32_t li) -> uint32_t { return output_offset_calc.get(li)[0]; };
-
-  const auto device = output.device();
-
-  torch::csprng::block_cipher<block_size>(input_ptr, input_numel, input_type_size, input_index_calc, output_ptr,
-    output_numel, output_type_size, output_index_calc, device, cipher, block_size / output_type_size,
+  torch::csprng::block_cipher<block_size>(input_ptr, input_numel, input_type_size, input_index_calc, input_ptr,
+    input_numel, input_type_size, input_index_calc, device, cipher, block_size / input_type_size,
     [] TORCH_CSPRNG_HOST_DEVICE(uint8_t * x) {});
 }
 
