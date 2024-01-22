@@ -25,11 +25,12 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 
 add_library(
   fssprgcuda SHARED
-  lib.cpp
-  torchcsprng/kernels.cu
-  torchcsprng/owcf.cu
-  torchcsprng/aes.cu
+  src/fssprgcuda.cpp
+  src/torchcsprng/kernels.cu
+  src/torchcsprng/owcf.cu
+  src/torchcsprng/aes.cu
 )
 set_target_properties(fssprgcuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-target_link_libraries(fssprgcuda "${TORCH_LIBRARIES}")
+target_include_directories(fssprgcuda PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(fssprgcuda PRIVATE "${TORCH_LIBRARIES}")
 target_compile_options(fssprgcuda PRIVATE $<$<COMPILE_LANGUAGE: CUDA>: --expt-extended-lambda>)

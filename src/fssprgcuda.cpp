@@ -1,16 +1,18 @@
 // Copyright (C) myl7
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "lib.h"
+#include "fssprgcuda.h"
 #include <torch/torch.h>
+#include "torchcsprng/kernels.cuh"
 
 using torch::Tensor;
-
-extern Tensor encrypt(Tensor buf, const uint8_t *key, size_t key_size, const std::string &cipher);
+using torch::csprng::cuda::encrypt;
 
 constexpr size_t block_t_size = 16;
 
-void csprng_matyas_meyer_oseas_aes128(uint8_t *buf, size_t buf_size, const uint8_t *key, size_t key_size) {
+namespace fssprgcuda {
+
+void matyas_meyer_oseas_aes128(uint8_t *buf, size_t buf_size, const uint8_t *key, size_t key_size) {
   const auto input_size_bytes = buf_size;
   TORCH_CHECK(input_size_bytes % block_t_size == 0, "input size in bytes(", input_size_bytes,
     ") is not a multiple of block size(", block_t_size, ")");
@@ -21,3 +23,5 @@ void csprng_matyas_meyer_oseas_aes128(uint8_t *buf, size_t buf_size, const uint8
 
   const auto output = encrypt(input, key, key_size, "aes128");
 }
+
+}  // namespace fssprgcuda
