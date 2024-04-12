@@ -3,10 +3,11 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 namespace fssprgcuda {
 
-void matyas_meyer_oseas_aes128(uint8_t *buf, int64_t buf_size, const uint8_t *key);
+int Aes128MatyasMeyerOseas(uint8_t *buf, size_t buf_size, const uint8_t *key, size_t key_size);
 
 }  // namespace fssprgcuda
