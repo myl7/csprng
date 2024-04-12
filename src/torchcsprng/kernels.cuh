@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <ATen/Tensor.h>
-
-using at::Tensor;
+#include <string>
+#include <cstddef>
+#include <cstdint>
 
 namespace torch {
 namespace csprng {
@@ -26,7 +26,7 @@ namespace cuda {
 
 // ================================================Encrypt/Decrypt=====================================================
 
-Tensor encrypt(Tensor buf, const uint8_t *key, size_t key_size, const std::string &cipher);
+int encrypt(uint8_t *buf, size_t buf_size, const uint8_t *key, size_t key_size, const std::string &cipher);
 
 // The original kernels_body.inc ends here
 
