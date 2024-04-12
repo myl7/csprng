@@ -35,5 +35,9 @@
 .idea
 .vscode
 
-# Build
-/build
+# Build dir
+build
+cmake-build-*
+
+# cargo
+/target

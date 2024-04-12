@@ -28,7 +28,8 @@ namespace cuda {
 
 void check_cipher(const std::string &cipher, size_t key_size) {
   if (cipher == "aes128") {
-    assert((void("key tensor must have 16 bytes(128 bits)"), key_size == 16));
+    // TODO: Different check
+    // assert((void("key tensor must have 16 bytes(128 bits)"), key_size == 16));
   } else {
     assert((void("encrypt/decrypt only supports 'aes128' cipher"), false));
   }
@@ -44,6 +45,7 @@ int aes_ecb_encrypt(uint8_t *buf, size_t buf_size, const uint8_t *key_bytes) {
 }
 
 int encrypt(uint8_t *buf, size_t buf_size, const uint8_t *key, size_t key_size, const std::string &cipher) {
+  // TODO: More checks
   check_cipher(cipher, key_size);
   return aes_ecb_encrypt(buf, buf_size, key);
 }

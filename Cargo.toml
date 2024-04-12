@@ -1,0 +1,15 @@
+[package]
+name = "fss-prg-cuda"
+version = "0.1.0"
+edition = "2021"
+authors = ["myl7 <myl@myl.moe>"]
+# description = ""
+license = "BSD-3-Clause"
+homepage = "https://github.com/myl7/fss-prg-cuda"
+# documentation = "https://docs.rs/fss-prg-cuda"
+repository = "https://github.com/myl7/fss-prg-cuda.git"
+keywords = ["crypto", "fss", "prg", "cuda"]
+categories = ["cryptography"]
+
+[dev-dependencies]
+aes = "0.8.4"

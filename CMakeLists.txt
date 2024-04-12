@@ -17,6 +17,6 @@ add_library(
   src/torchcsprng/aes.cu
 )
 target_compile_features(fssprgcuda PUBLIC cxx_std_17)
-set_target_properties(fssprgcuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(fssprgcuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON  CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 target_include_directories(fssprgcuda PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_options(fssprgcuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--extended-lambda>)
